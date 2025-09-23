@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Amortization Calculator</title>
+  <style>
+    :root{
+      --money-green:#0b6b3a;
+      --accent:#05221a;
+      --bg:#ffffff;
+      --muted:#6b6b6b;
+      --card-shadow: 0 6px 18px rgba(3,6,9,0.08);
+      --mono: 'Segoe UI Mono', 'Roboto Mono', Menlo, monospace;
+      --ui-font: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:var(--ui-font);background:var(--money-green);color:#0b0b0b}
+    .container{max-width:1100px;margin:36px auto;padding:28px;background:#fff;border-radius:14px;box-shadow:var(--card-shadow)}
+    header{display:flex;align-items:center;gap:16px}
+    .brand{display:flex;flex-direction:column}
+    h1{margin:0;font-size:20px;color:var(--money-green)}
+    .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-top:22px}
+    .card{padding:18px;border-radius:10px;background:#fbfffb;border:2px solid rgba(11,107,58,0.6)}
+    label{display:block;font-size:13px;color:var(--muted);margin-bottom:8px}
+    input{appearance:none;width:100%;padding:10px 12px;border-radius:8px;border:2px solid #0b6b3a;font-size:16px}
+    input:focus{outline:none;border-color:#05221a}
+    .row{display:flex;gap:12px}
+    .row > *{flex:1}
+    .actions{display:flex;gap:10px;flex-direction:column; justify-content:space-between; height:90px;}
+    button{background:var(--money-green);color:white;padding:10px 14px;border-radius:8px;border:0;font-weight:600;cursor:pointer}
+    button.secondary{background:#111}
+    button.ghost{background:transparent;color:var(--money-green);border:1px solid var(--money-green)}
+    .summary{display:flex;gap:12px;align-items:stretch;flex-wrap:nowrap;justify-content:space-between}
+    .summary .tile{flex:1;background:#fff;padding:12px;border-radius:8px;border:2px solid rgba(11,107,58,0.6);text-align:center}
+    .tile .big{font-size:20px;font-weight:700;color:var(--accent);font-family:var(--mono);}
+    .tile .small{font-size:12px;color:var(--muted)}
+    .saved{display:flex;gap:12px;align-items:stretch;justify-content:space-between}
+    .saved .tile{flex:1;background:#fff;padding:12px;border-radius:8px;border:2px solid rgba(11,107,58,0.6);text-align:center}
+    .table-wrap{margin-top:22px;overflow:auto;border-radius:10px;border:2px solid rgba(3,6,9,0.6)}
+    table{width:100%;border-collapse:collapse;min-width:980px}
+    th,td{padding:10px 12px;text-align:right;border-bottom:1px solid rgba(3,6,9,0.2);font-size:13px}
+    th{position:sticky;top:0;background:#fff;text-transform:uppercase;font-size:12px;color:var(--muted);z-index:1}
+    td.left, th.left{text-align:left}
+    td.money{font-family:var(--mono);color:var(--accent);font-weight:600}
+    .small{font-size:12px;color:var(--muted)}
+    footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:right;font-weight:600}
+    @media (max-width:880px){
+      .grid{grid-template-columns:1fr}
+      .summary{flex-wrap:wrap}
+      .saved{flex-wrap:wrap}
+      .table-wrap table{min-width:720px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="24" height="24" rx="6" fill="var(--money-green)"/>
+        <path d="M6 13c1.5-2 4-3 6-3s4.5 1 6 3v4H6v-4z" fill="white" opacity="0.16"/>
+        <path d="M8 10c1.333-1.333 3-2 4-2s2.667.667 4 2" stroke="white" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="brand">
+        <h1>Amortization Calculator</h1>
+      </div>
+    </header>
+
+    <div class="grid" style="margin-top:20px">
+      <!-- Left column -->
+      <div class="card" style="display:flex;flex-direction:column;justify-content:space-between;">
+        <div>
+          <label for="purchase">Purchase Price</label>
+          <input id="purchase" type="text" value="$500,000">
+          <div style="height:12px"></div>
+          <label for="down">Down Payment</label>
+          <input id="down" type="text" value="$25,000">
+          <div style="height:12px"></div>
+          <label for="downPercent">Down Payment (%)</label>
+          <input id="downPercent" type="text" value="5%">
+          <div style="height:12px"></div>
+          <div class="row">
+            <div>
+              <label for="interest">Interest Rate (%)</label>
+              <input id="interest" type="text" value="6%">
+            </div>
+            <div>
+              <label for="years">Amortization (years)</label>
+              <input id="years" type="text" value="30">
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <button id="download" class="ghost">Download Table</button>
+          <button id="reset" class="secondary">Reset</button>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div>
+        <!-- Summary -->
+        <div class="card summary">
+          <div class="tile">
+            <div class="small">Loan Amount</div>
+            <div id="loanAmt" class="big">$0</div>
+          </div>
+          <div class="tile">
+            <div class="small">Monthly Payment</div>
+            <div id="monthly" class="big">$0.00</div>
+          </div>
+          <div class="tile">
+            <div class="small">Total Interest</div>
+            <div id="totalInterest" class="big">$0</div>
+          </div>
+        </div>
+
+        <!-- Extra payments -->
+        <div class="card" style="margin-top:12px;padding-top:16px">
+          <div class="row">
+            <div>
+              <label for="extra">Extra Monthly Payment</label>
+              <input id="extra" type="text" value="$0">
+            </div>
+            <div>
+              <label for="startMonth">Start Month</label>
+              <input id="startMonth" type="text" value="1">
+            </div>
+          </div>
+          <div style="height:12px"></div>
+          <div class="row">
+            <div>
+              <label for="numExtra">Number of Extra Payments</label>
+              <input id="numExtra" type="text" value="0">
+            </div>
+          </div>
+          <div class="small" style="margin-top:8px">Enter "all" to apply to every month.</div>
+        </div>
+
+        <!-- Saved outputs -->
+        <div class="card saved" style="margin-top:12px;">
+          <div class="tile">
+            <div class="small">Saved (Months / Years)</div>
+            <div id="savedMonths" class="big">0 / 0.00</div>
+          </div>
+          <div class="tile">
+            <div class="small">Total Extra Payments</div>
+            <div id="totalExtra" class="big">$0</div>
+          </div>
+          <div class="tile">
+            <div class="small">Interest Saved</div>
+            <div id="savedInterest" class="big">$0</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="table-wrap" id="tableWrap" style="display:none">
+      <table id="amortTable" aria-live="polite">
+        <thead>
+          <tr>
+            <th class="left">Month</th>
+            <th>Payment</th>
+            <th>Principal</th>
+            <th>Interest</th>
+            <th>Extra</th>
+            <th>Balance</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <footer>
+      Cameron Webb — Mortgage Loan Officer — NMLS#: 2603718
+    </footer>
+  </div>
+
+<script>
+const fmtCurrencyNoDecimals = num => "$" + (isFinite(num)? Math.round(num).toLocaleString('en-US'):'0');
+const fmtCurrency = num => "$" + (isFinite(num)? num.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'0.00');
+const fmtPercent = num => (isFinite(num)? num.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00') + "%";
+
+function parseCurrency(val){ return parseFloat(val.replace(/[^0-9.-]+/g,""))||0; }
+function parsePercent(val){ return parseFloat(val.replace(/[^0-9.-]+/g,""))||0; }
+
+function calculateSchedule({purchase,down,annualRatePct,years,extra=0,extraStart=1,numExtra="all"}){
+  const loan = Math.max(0, purchase - down);
+  const months = Math.max(1, Math.round(years*12));
+  const monthlyRate = (annualRatePct/100)/12;
+  let payment;
+  if(monthlyRate===0) payment=loan/months;
+  else payment=loan*monthlyRate/(1-Math.pow(1+monthlyRate,-months));
+  let balance=loan;
+  const rows=[];
+  let totalInterest=0;
+  let numExtraCount=(numExtra==="all")?months:(parseInt(numExtra)||0);
+  if(numExtraCount>months) numExtraCount=months;
+
+  for(let m=1;m<=months && balance>0.00001;m++){
+    const interest=balance*monthlyRate;
+    let principal=payment-interest;
+    let extraForThisMonth=0;
+    if(m>=extraStart && (m-extraStart)<numExtraCount){
+      extraForThisMonth=parseCurrency(document.getElementById('extra').value);
+    }
+    if(principal+extraForThisMonth>balance){
+      principal=balance;
+      extraForThisMonth=0;
+    }
+    const paymentActual=principal+interest+extraForThisMonth;
+    balance=Math.max(0,balance-principal-extraForThisMonth);
+    totalInterest+=interest;
+    rows.push({month:m,payment:paymentActual,principal,interest,extra:extraForThisMonth,balance});
+    if(balance<=0.00001) break;
+  }
+  return {loan,monthlyPayment:payment,totalInterest,rows};
+}
+
+const purchaseEl=document.getElementById('purchase');
+const downEl=document.getElementById('down');
+const downPercentEl=document.getElementById('downPercent');
+const interestEl=document.getElementById('interest');
+const yearsEl=document.getElementById('years');
+const extraEl=document.getElementById('extra');
+const startMonthEl=document.getElementById('startMonth');
+const numExtraEl=document.getElementById('numExtra');
+const amortTable=document.getElementById('amortTable').querySelector('tbody');
+const tableWrap=document.getElementById('tableWrap');
+const loanAmtEl=document.getElementById('loanAmt');
+const monthlyEl=document.getElementById('monthly');
+const totalInterestEl=document.getElementById('totalInterest');
+const savedMonthsEl=document.getElementById('savedMonths');
+const savedInterestEl=document.getElementById('savedInterest');
+const totalExtraEl=document.getElementById('totalExtra');
+const resetBtn=document.getElementById('reset');
+const downloadBtn=document.getElementById('download');
+
+function render(changedEl){
+  const purchase=parseCurrency(purchaseEl.value);
+  let down=parseCurrency(downEl.value);
+  let downPct=parsePercent(downPercentEl.value);
+
+  if(changedEl===downEl){
+    downPct=(purchase>0)?(down/purchase*100):0;
+    downPercentEl.value=fmtPercent(downPct);
+  } else if(changedEl===downPercentEl){
+    down=(purchase*downPct/100);
+    downEl.value=fmtCurrencyNoDecimals(down);
+  } else {
+    downPct=(purchase>0)?(down/purchase*100):0;
+    downPercentEl.value=fmtPercent(downPct);
+  }
+
+  const annualRate=parsePercent(interestEl.value);
+  const years=parseFloat(yearsEl.value)||0;
+  const extra=parseCurrency(extraEl.value);
+  const extraStart=parseInt(startMonthEl.value)||1;
+  const numExtra=numExtraEl.value.trim().toLowerCase();
+
+  const data=calculateSchedule({purchase,down,annualRatePct:annualRate,years,extra,extraStart,numExtra});
+  const baseline=calculateSchedule({purchase,down,annualRatePct:annualRate,years,extra:0,extraStart:1,numExtra:0});
+
+  loanAmtEl.textContent=fmtCurrencyNoDecimals(data.loan);
+  monthlyEl.textContent=fmtCurrency(data.monthlyPayment);
+  totalInterestEl.textContent=fmtCurrencyNoDecimals(Math.ceil(data.totalInterest));
+
+  const monthsSaved = Math.max(0, baseline.rows.length - data.rows.length);
+  const yearsSaved = monthsSaved/12;
+  const interestSaved = baseline.totalInterest - data.totalInterest;
+  const totalExtra = data.rows.reduce((acc,row)=>acc+row.extra,0);
+
+  savedMonthsEl.textContent = monthsSaved > 0 ? `${monthsSaved} / ${yearsSaved.toFixed(2)}` : "0 / 0.00";
+  totalExtraEl.textContent = fmtCurrencyNoDecimals(totalExtra);
+  savedInterestEl.textContent = interestSaved > 0 ? fmtCurrencyNoDecimals(Math.ceil(interestSaved)) : "$0";
+
+  amortTable.innerHTML='';
+  if(data.rows.length===0){tableWrap.style.display='none';return;}
+  tableWrap.style.display='';
+  data.rows.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=
+      `<td class="left">${r.month}</td>
+       <td class="money">${fmtCurrency(r.payment)}</td>
+       <td class="money">${fmtCurrency(r.principal)}</td>
+       <td class="money">${fmtCurrency(r.interest)}</td>
+       <td class="money">${fmtCurrency(r.extra)}</td>
+       <td class="money">${fmtCurrency(r.balance)}</td>`;
+    amortTable.appendChild(tr);
+  });
+}
+
+function attachUpdateEvents(el,formatFn,parseFn){
+  const update=()=>{ el.value=formatFn(parseFn(el.value)); render(el); };
+  el.addEventListener('keydown',e=>{if(e.key==="Enter") update();});
+  el.addEventListener('blur',update);
+}
+
+attachUpdateEvents(purchaseEl,fmtCurrencyNoDecimals,parseCurrency);
+attachUpdateEvents(downEl,fmtCurrencyNoDecimals,parseCurrency);
+attachUpdateEvents(downPercentEl,fmtPercent,parsePercent);
+attachUpdateEvents(interestEl,fmtPercent,parsePercent);
+attachUpdateEvents(yearsEl,v=>v,v=>parseFloat(v)||0);
+attachUpdateEvents(extraEl,fmtCurrencyNoDecimals,parseCurrency);
+attachUpdateEvents(startMonthEl,v=>v,v=>parseInt(v)||1);
+attachUpdateEvents(numExtraEl,v=>v,v=>v);
+
+resetBtn.addEventListener('click',()=>{
+  purchaseEl.value=fmtCurrencyNoDecimals(500000);
+  downEl.value=fmtCurrencyNoDecimals(25000);
+  downPercentEl.value=fmtPercent((25000/500000*100));
+  interestEl.value=fmtPercent(6);
+  yearsEl.value="30";
+  extraEl.value=fmtCurrencyNoDecimals(0);
+  startMonthEl.value="1";
+  numExtraEl.value="0";
+  render();
+});
+
+downloadBtn.addEventListener('click',()=>{
+  const rows=document.querySelectorAll('#amortTable tbody tr');
+  if(!rows.length) return alert('Please adjust inputs to generate the schedule first.');
+  let csv='Month,Payment,Principal,Interest,Extra,Balance\n';
+  rows.forEach(tr=>{
+    const cols=Array.from(tr.children).map(td=>td.textContent.replace(/[^0-9.-]+/g,''));
+    csv+=cols.join(',')+'\n';
+  });
+  const blob=new Blob([csv],{type:'text/csv'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='amortization.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+});
+
+window.addEventListener('load',()=>{
+  purchaseEl.value=fmtCurrencyNoDecimals(500000);
+  downEl.value=fmtCurrencyNoDecimals(25000);
+  downPercentEl.value=fmtPercent((25000/500000*100));
+  interestEl.value=fmtPercent(6);
+  yearsEl.value="30";
+  extraEl.value=fmtCurrencyNoDecimals(0);
+  startMonthEl.value="1";
+  numExtraEl.value="0";
+  render();
+});
+</script>
+</body>
+</html>
