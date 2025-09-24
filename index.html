@@ -28,6 +28,8 @@
     .row{display:flex;gap:12px}
     .row > *{flex:1}
     .actions{display:flex;gap:8px;flex-direction:column; justify-content:flex-end; height:80px; margin-top:8px;}
+    .button-row{display:flex;gap:8px;}
+    .button-row button{flex:1;}
     button{background:var(--money-green);color:white;padding:10px 14px;border-radius:8px;border:0;font-weight:600;cursor:pointer}
     button.secondary{background:#111}
     button.ghost{background:transparent;color:var(--money-green);border:1px solid var(--money-green)}
@@ -50,8 +52,8 @@
       .summary{flex-wrap:wrap}
       .saved{flex-wrap:wrap}
       .table-wrap table{min-width:720px}
-      .container{margin:16px auto;padding:20px}
-      .grid{margin-top:16px}
+      .container{margin:8px auto;padding:16px}
+      .grid{margin-top:12px}
       .actions{margin-top:8px;}
     }
   </style>
@@ -95,7 +97,10 @@
         </div>
         <div class="actions">
           <button id="download" class="ghost">Download Table</button>
-          <button id="reset" class="secondary">Reset</button>
+          <div class="button-row">
+            <button id="zero" class="secondary">Zero</button>
+            <button id="reset" class="secondary">Reset</button>
+          </div>
         </div>
       </div>
 
@@ -236,6 +241,7 @@ const savedMonthsEl=document.getElementById('savedMonths');
 const savedInterestEl=document.getElementById('savedInterest');
 const totalExtraEl=document.getElementById('totalExtra');
 const resetBtn=document.getElementById('reset');
+const zeroBtn=document.getElementById('zero');
 const downloadBtn=document.getElementById('download');
 
 function render(changedEl){
@@ -313,6 +319,18 @@ resetBtn.addEventListener('click',()=>{
   downPercentEl.value=fmtPercent((25000/500000*100));
   interestEl.value=fmtPercent(6);
   yearsEl.value="30";
+  extraEl.value=fmtCurrencyNoDecimals(0);
+  startMonthEl.value="1";
+  numExtraEl.value="0";
+  render();
+});
+
+zeroBtn.addEventListener('click',()=>{
+  purchaseEl.value=fmtCurrencyNoDecimals(0);
+  downEl.value=fmtCurrencyNoDecimals(0);
+  downPercentEl.value=fmtPercent(0);
+  interestEl.value=fmtPercent(0);
+  yearsEl.value="0";
   extraEl.value=fmtCurrencyNoDecimals(0);
   startMonthEl.value="1";
   numExtraEl.value="0";
