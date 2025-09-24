@@ -55,7 +55,12 @@
       .container{margin:8px auto;padding:16px}
       .grid{margin-top:12px}
       .actions{margin-top:8px;}
-      input{padding:8px 12px;font-size:15px;}
+      /* Make inputs more compact on small screens */
+      input{padding:6px 10px;font-size:15px;line-height:1.1}
+      label{margin-bottom:6px}
+      .row{gap:8px}
+      /* Reduce inline spacer heights used between inputs */
+      div[style*="height:12px"]{height:6px !important}
     }
   </style>
 </head>
