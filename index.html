@@ -55,6 +55,7 @@
       .container{margin:8px auto;padding:16px}
       .grid{margin-top:12px}
       .actions{margin-top:8px;}
+      input{padding:8px 12px;font-size:15px;}
     }
   </style>
 </head>
@@ -302,6 +303,7 @@ function attachUpdateEvents(el,formatFn,parseFn){
   const update=()=>{ el.value=formatFn(parseFn(el.value)); render(el); };
   el.addEventListener('keydown',e=>{if(e.key==="Enter") update();});
   el.addEventListener('blur',update);
+  el.addEventListener('focus',()=>{ el.select(); });
 }
 
 attachUpdateEvents(purchaseEl,fmtCurrencyNoDecimals,parseCurrency);
