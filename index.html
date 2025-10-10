@@ -194,7 +194,7 @@
 <script>
 const fmtCurrencyNoDecimals = num => "$" + (isFinite(num)? Math.round(num).toLocaleString('en-US'):'0');
 const fmtCurrency = num => "$" + (isFinite(num)? num.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}):'0.00');
-const fmtPercent = num => (isFinite(num)? num.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}) : '0.00') + "%";
+const fmtPercent = num => (isFinite(num)? num.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:3}) : '0.00') + "%";
 
 function parseCurrency(val){ return parseFloat(val.replace(/[^0-9.-]+/g,""))||0; }
 function parsePercent(val){ return parseFloat(val.replace(/[^0-9.-]+/g,""))||0; }
@@ -379,3 +379,4 @@ window.addEventListener('load',()=>{
 </script>
 </body>
 </html>
+
